@@ -1,6 +1,10 @@
 include <BOSL2/std.scad>
 include <BOSL2/bottlecaps.scad>
 
+// Smoother edges
+$fa = 2;
+$fs = 0.25;
+
 container_d         = 60;  // Outer diameter of the main container (mm)
 container_height    = 30;  // Height of the container body (mm)
 container_wall_th   = 2;   // Container wall thickness (mm)
