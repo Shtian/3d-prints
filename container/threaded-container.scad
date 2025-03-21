@@ -1,21 +1,21 @@
 include <BOSL2/std.scad>
 include <BOSL2/bottlecaps.scad>
 
-$fn = $preview ? 32 : 128;
+$fn = $preview ? 32 : 64;
 
-thread_depth        = 1;   // Size of threads
+thread_depth        = 2;   // Size of threads
 thread_tolerance    = 0.2; // Tolerance between threads (shrinks neck in practice)
-thread_pitch        = 2;   // Pitch for both neck and cap
+thread_pitch        = 4;   // Pitch for both neck and cap
 
-container_d           = 30;  // Outer diameter of the main container (mm)
-container_height      = 10;  // Height of the container body (mm)
-container_neck_height = 5;   // Neck and cap height (mm)
+container_d           = 60;  // Outer diameter of the main container (mm)
+container_height      = 30;  // Height of the container body (mm)
+container_neck_height = 10;   // Neck and cap height (mm)
 container_wall_th     = 2;   // Container wall thickness (mm)
-container_chamfer     = container_wall_th + thread_tolerance + thread_depth; // Supports the neck
+container_chamfer     = container_wall_th*2 + thread_depth + thread_tolerance * 2; // Supports the neck
 
-neck_d              = container_d - container_wall_th * 2 - thread_tolerance - thread_depth;  // Outer diameter of neck (without threads)
-neck_inner_d        = neck_d - container_wall_th - thread_tolerance - thread_depth;           // Inner diameter of the neck
-neck_thread_od      = neck_d + thread_depth - thread_tolerance;                               // Outer diameter of the threads on the neck
+neck_d              = container_d - container_wall_th * 2 - thread_tolerance * 2 - thread_depth * 2;  // Outer diameter of neck (without threads)
+neck_inner_d        = neck_d - container_wall_th * 2 - thread_tolerance * 2 - thread_depth * 2;           // Inner diameter of the neck
+neck_thread_od      = neck_d + thread_depth * 2 - thread_tolerance * 2;                               // Outer diameter of the threads on the neck
 
 cap_tolerance       = 0;                                   // Extra radial clearance for the threads (NB! Increases cap diameter)
 cap_thread_od       = container_d - container_wall_th * 2;
@@ -53,7 +53,7 @@ module container_body() {
 		cylinder(h = container_height, r = container_d / 2);
 		// Hollow out the inside
 		translate([0,0,container_wall_th])
-			cyl(l=container_height - container_wall_th, d=container_d - container_wall_th, chamfer=container_chamfer, anchor=BOTTOM);
+			cyl(l=container_height - container_wall_th, d=container_d - container_wall_th*2, chamfer=container_chamfer, anchor=BOTTOM);
 	}
 }
 
@@ -72,6 +72,7 @@ module the_cap_grouped() {
     the_cap();
   }
 }
+
 color("Coral")
 container_with_neck();
 
