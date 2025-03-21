@@ -1,47 +1,79 @@
 include <BOSL2/std.scad>
 include <BOSL2/bottlecaps.scad>
 
-// uncomment to render more smoothly (might get laggy)
-//$fa = 2;
-//$fs = 0.25;
+$fn = $preview ? 32 : 128;
 
-container_d         = 60;  // Outer diameter of the main container (mm)
-container_height    = 30;  // Height of the container body (mm)
-wall_thickness   = 2;   // Container wall thickness (mm)
-cap_tolerance       = 0.2; // Extra radial clearance for the threads
-thread_type = 400; // SPI Thread type (400, 410, 415) AKA. 1, 1.5 or 2 rounds of threads.
+container_d         = 30;  // Outer diameter of the main container (mm)
+container_height    = 10;  // Height of the container body (mm)
+container_wall_th   = 2;   // Container wall thickness (mm)
+cap_and_neck_height = 5;  // Adjusted so cap sits flush
 
+thread_depth        = 1;   // Size of threads
+thread_tolerance    = 0.2; // Tolerance between threads (shrinks neck in practice)
+thread_pitch        = 1;   // Pitch for both neck and cap
+
+neck_d              = container_d - container_wall_th * 2 - thread_tolerance;  // Outer diameter of neck (without threads)
+neck_thread_od      = neck_d + thread_depth - thread_tolerance;  // Outer diameter of the threads on the neck
+neck_inner_d        = neck_d - container_wall_th - thread_tolerance;  // Inner diameter of the neck
+
+cap_tolerance       = 0;   // Extra radial clearance for the threads (NB! Increases cap diameter)
+cap_thread_od       = neck_thread_od - thread_depth;
+cap_texture         = "none"; // "none", "knurled", "ribbed"
 
 module the_cap() {
-  // sp_cap( diam, type, wall, [style], [top_adj], [bot_adj], [texture], [$slop])
-  sp_cap(container_d, thread_type, wall_thickness, texture="none", $slop=cap_tolerance, anchor=BOTTOM);
+	generic_bottle_cap(
+		container_wall_th,           // Cap wall thickness
+		cap_texture,                      // Texture: "none", "knurled", "ribbed"
+		height        = cap_and_neck_height,
+		thread_od     = cap_thread_od,
+		thread_depth  = thread_depth,
+		tolerance     = cap_tolerance,
+		flank_angle   = 15,             // Default is 15
+		pitch         = thread_pitch,
+		anchor        = BOTTOM
+	);
 }
 
 module the_neck() {
-  // sp_neck( diam, type, wall, [style], [bead])
-  sp_neck(container_d, thread_type, wall_thickness, style="L", anchor=BOTTOM);
+	generic_bottle_neck(
+		neck_d    = neck_d,            // Outer diameter (without threads)
+		id        = neck_inner_d,      // Inner diameter
+		thread_od = neck_thread_od,    // Outer diameter with threads
+		height    = cap_and_neck_height,
+		support_d = 0,                 // No support ring
+		pitch     = thread_pitch,
+		anchor    = BOTTOM
+	);
 }
 
 module container_body() {
-  difference() {
-    // Outer cylinder
-    cylinder(h = container_height, r = container_d / 2);
-    // Hollow out the inside with a chamfered cylinder
-    translate([0,0,wall_thickness])
-      cyl(l=container_height - wall_thickness, d=container_d - wall_thickness, chamfer=wall_thickness, anchor=BOTTOM);
-  }
+	difference() {
+		// Outer cylinder
+		cylinder(h = container_height, r = container_d / 2);
+		// Hollow out the inside
+		translate([0,0,container_wall_th])
+			cyl(l=container_height - container_wall_th, d=container_d - container_wall_th, chamfer=container_wall_th + thread_tolerance, anchor=BOTTOM);
+	}
 }
 
 module container_with_neck() {
+	union() {
+		// Main container
+		container_body();
+		// Neck on top
+		translate([0, 0, container_height])
+			the_neck();
+	}
+}
+
+module the_cap_grouped() {
   union() {
-    container_body();
-    // Add the neck on top
-    translate([0, 0, container_height])
-      the_neck();
+    the_cap();
   }
 }
 
 container_with_neck();
-// Move the cap away from the container for display
-translate([100, 0, 0])
-  the_cap();
+
+// Position cap flush with the container (adjust as needed)
+translate([container_d * 1.5, 0, 0])
+	the_cap_grouped();
