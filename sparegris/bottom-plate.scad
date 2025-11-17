@@ -17,7 +17,7 @@ module castle_outline() {
         for (sy = [-1, 1])
             translate([sx * (square_size/2 - protrusion),
                        sy * (square_size/2 - protrusion)])
-                circle(d = 2 * protrusion * 2); // 10 mm diameter -> 5 mm protrusion
+                circle(d = (2 * protrusion * 2)-1); // 10 mm diameter -> 5 mm protrusion
     }
 }
 
@@ -41,11 +41,11 @@ difference() {
     translate([0, 0, 3])
     linear_extrude(thickness - 3)
     union() {
-        square([square_size - 2, square_size - 2], center = true);
+        square([square_size - 3, square_size - 3], center = true);
         for (sx = [-1, 1])
         for (sy = [-1, 1])
             translate([sx * (square_size/2 - protrusion - 0.5),
                        sy * (square_size/2 - protrusion - 0.5)])
-                circle(d = (2 * protrusion * 2) - 2);
+                circle(d = (2 * protrusion * 2) - 3);
     }
 }
