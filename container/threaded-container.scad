@@ -1,7 +1,7 @@
 include <BOSL2/std.scad>
 include <BOSL2/bottlecaps.scad>
 
-$fn = $preview ? 32 : 64;
+$fn = $preview ? 32 : 128;
 
 thread_depth        = 2;   // Size of threads
 thread_tolerance    = 0.2; // Tolerance between threads (shrinks neck in practice)
